@@ -6,7 +6,7 @@
 
 ## Overview
 
-**Shadowhunter** is an interactive browser-based tool for computing and visualizing Permanently Shadowed Regions (PSRs) on planetary bodies. Given a set of orbital, physical and topographic parameters, the tool calculates the critical latitude above which crater floors or sloped terrain can remain in permanent shadow throughout a full orbital period and estimates whether those regions are cold enough to trap and preserve water ice.
+**Shadowhunter** is an interactive browser-based tool for computing and visualizing Permanently Shadowed Regions (PSRs) on planetary bodies. Given a set of orbital and physical parameters, the tool calculates the critical latitude above which crater floors or sloped terrain can remain in permanent shadow throughout a full orbital period and estimates whether those regions are cold enough to trap and preserve water ice.
 
 The tool runs entirely in the browser, requires no installation and updates in real time as parameters are adjusted. It includes presets for Mercury, the Moon, Mars, Ceres, and Europa, and supports fully custom planetary configurations.
 
@@ -137,7 +137,7 @@ The globe displays a latitude-dependent color overlay representing the local ill
 | **Purple** | PSR Zone | |φ| ≥ φ_PSR — permanent shadow possible with the specified topography |
 | **Cyan-blue** | Near-PSR | Sun grazes the horizon; shallow topography may create local PSRs |
 | **Amber** | Low-sun polar | Low solar elevation; significant polar cooling but no permanent shadow |
-| **Cyan dashed ring** | Critical latitude | φ_PSR — the boundary of the PSR-capable zone |
+| **Pink dashed ring** | Critical latitude | φ_PSR — the boundary of the PSR-capable zone |
 
 The globe uses an equirectangular canvas texture updated in real time as parameters change. Lighting is uniform (no directional shading) to ensure the body color represents albedo rather than illumination geometry.
 
