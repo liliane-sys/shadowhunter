@@ -18,7 +18,7 @@ The tool runs entirely in the browser, requires no installation and updates in r
 
 A Permanently Shadowed Region is a surface location that never receives direct sunlight over a complete orbital period. On airless or thin-atmosphere bodies, these regions can remain extraordinarily cold; cold enough to act as cold traps for volatiles such as water ice, CO₂, SO₂, and other compounds that would otherwise sublimate.
 
-PSRs are not simply 'dark craters'. Their existence depends on a precise geometric relationship between the body's axial tilt, the local topography, and the orbital geometry.
+PSRs are not simply 'dark craters': Their existence depends on a precise geometric relationship between the body's axial tilt, the local topography and orbital geometry.
 
 ### The Horizon Angle
 
