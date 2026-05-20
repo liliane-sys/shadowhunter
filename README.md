@@ -1,8 +1,5 @@
-# shadowhunter
-Shadowhunter - a PSR calculator
-as in:
 # SHADOWHUNTER
-### Permanently Shadowed Region Calculator
+### a Permanently Shadowed Region Calculator
 *by Liliane ML Burkhard, 2026*
 
 ---
@@ -171,3 +168,5 @@ If you use Shadowhunter in teaching, outreach or research contexts, please credi
 ---
 
 *Shadowhunter is part of a suite of interactive planetary science visualization tools including Quakeglobe (live seismic monitoring) and the BELA Altimetry Viewer (BepiColombo laser altimeter data; expected online in 2027).*
+
+
