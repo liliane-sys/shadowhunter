@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    SHADOWHUNTER — Permanently Shadowed Region Calculator
+    by Liliane ML Burkhard
+    2026
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHADOWHUNTER — PSR Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:    #00f5ff;
+      --purple:  #7722ff;
+      --magenta: #e040fb;
+      --green:   #00ff88;
+      --amber:   #ffcc00;
+      --red:     #ff3030;
+      --bg:      #000008;
+      --panel:   rgba(4, 7, 18, 0.91);
+      --border:  rgba(0, 245, 255, 0.22);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--cyan);
+    }
+
+    #globe-container { position: fixed; inset: 0; z-index: 1; }
+
+    #scanlines {
+      position: fixed; inset: 0; z-index: 8; pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom, transparent 0px, transparent 3px,
+        rgba(0,0,0,0.055) 3px, rgba(0,0,0,0.055) 4px
+      );
+    }
+
+    /* ── HUD ── */
+    #hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+    .corner {
+      position: absolute; width: 40px; height: 40px;
+      border-color: var(--cyan); border-style: solid; opacity: 0.35;
+    }
+    .corner-tl { top:16px; left:16px;  border-width:2px 0 0 2px; }
+    .corner-tr { top:16px; right:16px; border-width:2px 2px 0 0; }
+    .corner-bl { bottom:16px; left:16px;  border-width:0 0 2px 2px; }
+    .corner-br { bottom:16px; right:16px; border-width:0 2px 2px 0; }
+
+    #title-bar {
+      position: absolute; top:20px; left:50%;
+      transform: translateX(-50%); text-align:center; white-space:nowrap;
+    }
+    #title-main {
+      font-family:'Orbitron',monospace; font-size:clamp(14px,2.2vw,26px);
+      font-weight:900; letter-spacing:0.5em; color:var(--cyan);
+      text-shadow: 0 0 22px var(--cyan), 0 0 44px var(--cyan);
+    }
+    #title-sub {
+      font-size:clamp(9px,0.95vw,12px); letter-spacing:0.28em;
+      color:var(--cyan); opacity:0.42; margin-top:5px;
+    }
+
+    /* ── Shared panel styles ── */
+    .side-panel {
+      position: fixed; top:50%; z-index:15;
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 15px 17px; pointer-events:all;
+      backdrop-filter: blur(12px);
+      transform: translateY(-50%);
+    }
+    .panel-title {
+      font-family:'Orbitron',monospace; font-size:9px;
+      letter-spacing:0.3em; color:var(--cyan); opacity:0.75;
+      margin-bottom:13px; text-transform:uppercase;
+    }
+    .section-label {
+      font-size:8px; letter-spacing:0.2em;
+      color:var(--cyan); opacity:0.55;
+      margin-bottom:8px; text-transform:uppercase;
+    }
+    .input-section {
+      margin-bottom:13px; padding-bottom:13px;
+      border-bottom:1px solid rgba(0,245,255,0.1);
+    }
+    .input-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+
+    /* ── Left panel ── */
+    #left-panel {
+      left:18px; width:258px;
+      max-height:90vh; overflow-y:auto;
+    }
+    #left-panel::-webkit-scrollbar { width:3px; }
+    #left-panel::-webkit-scrollbar-thumb { background:rgba(0,245,255,0.2); }
+
+    /* Presets */
+    .preset-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:5px; margin-bottom:2px;
+    }
+    .preset-btn {
+      font-family:'Orbitron',monospace; font-size:7.5px;
+      letter-spacing:0.1em; padding:7px 3px;
+      border:1px solid rgba(0,245,255,0.22);
+      background:transparent; color:var(--cyan);
+      cursor:pointer; opacity:0.52; transition:all 0.18s;
+      text-transform:uppercase;
+    }
+    .preset-btn:hover { opacity:0.9; background:rgba(0,245,255,0.09); }
+    .preset-btn.active {
+      opacity:1; background:rgba(0,245,255,0.14);
+      border-color:var(--cyan);
+      box-shadow:0 0 10px rgba(0,245,255,0.22);
+    }
+
+    /* Param rows */
+    .param-row {
+      display:flex; justify-content:space-between;
+      align-items:center; margin-bottom:5px; gap:6px;
+    }
+    .param-label { font-size:10px; color:rgba(0,245,255,0.80); white-space:nowrap; }
+    .param-value { font-size:11px; color:var(--cyan); text-align:right; min-width:48px; }
+    .param-unit  { font-size:9px; opacity:0.55; margin-left:2px; }
+
+    /* Range sliders */
+    input[type=range] {
+      -webkit-appearance:none; width:100%; height:2px;
+      background:rgba(0,245,255,0.18); outline:none; margin-bottom:8px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:13px; height:13px;
+      border-radius:50%; background:var(--cyan); cursor:pointer;
+      box-shadow:0 0 8px var(--cyan);
+    }
+    input[type=range]::-moz-range-thumb {
+      width:13px; height:13px; border-radius:50%;
+      background:var(--cyan); cursor:pointer; border:none;
+      box-shadow:0 0 8px var(--cyan);
+    }
+
+    /* Number inputs */
+    .num-row {
+      display:flex; gap:6px; align-items:center; margin-bottom:8px;
+    }
+    .num-label { font-size:10px; color:rgba(0,245,255,0.80); white-space:nowrap; flex-shrink:0; }
+    input[type=number] {
+      background:rgba(0,245,255,0.07); border:1px solid rgba(0,245,255,0.22);
+      color:var(--cyan); font-family:'Share Tech Mono',monospace;
+      font-size:11px; padding:4px 7px; flex:1; outline:none;
+      -moz-appearance:textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+    input[type=number]:focus { border-color:var(--cyan); box-shadow:0 0 6px rgba(0,245,255,0.18); }
+
+    /* Horizon angle computed display */
+    #horizon-display {
+      background:rgba(0,245,255,0.06); border:1px solid rgba(0,245,255,0.18);
+      padding:8px 10px; display:flex;
+      justify-content:space-between; align-items:center; margin-top:2px;
+    }
+    #horizon-display .hlabel { font-size:9px; letter-spacing:0.18em; opacity:0.65; }
+    #horizon-display .hval {
+      font-family:'Orbitron',monospace; font-size:17px; font-weight:700;
+      color:var(--cyan); text-shadow:0 0 10px var(--cyan);
+    }
+
+    /* ── Right panel ── */
+    #right-panel { right:18px; width:246px; }
+
+    /* Big critical latitude */
+    #crit-lat-wrap { text-align:center; margin:6px 0 14px; }
+    #crit-lat-val {
+      font-family:'Orbitron',monospace; font-size:42px; font-weight:900;
+      line-height:1; margin-bottom:3px;
+    }
+    #crit-lat-lbl { font-size:9px; letter-spacing:0.22em; opacity:0.60; }
+
+    .result-row {
+      display:flex; justify-content:space-between;
+      align-items:baseline; margin-bottom:9px; gap:10px; font-size:11px;
+    }
+    .result-row:last-child { margin-bottom:0; }
+    .r-lbl { color:rgba(0,245,255,0.72); white-space:nowrap; }
+    .r-val { color:var(--cyan); text-align:right; }
+
+    .r-divider { border-top:1px solid rgba(0,245,255,0.12); margin:11px 0; }
+
+    /* Ice status box */
+    #ice-box {
+      text-align:center; padding:10px 8px;
+      border:1px solid rgba(0,245,255,0.2); margin-top:12px;
+      transition:all 0.4s;
+    }
+    #ice-lbl  { font-family:'Orbitron',monospace; font-size:11px; letter-spacing:0.18em; }
+    #ice-note { font-size:9px; opacity:0.70; margin-top:4px; letter-spacing:0.1em; }
+
+    .st-stable   { color:var(--green)!important; text-shadow:0 0 10px var(--green)!important; border-color:rgba(0,255,136,0.3)!important; }
+    .st-marginal { color:var(--amber)!important; text-shadow:0 0 10px var(--amber)!important; border-color:rgba(255,204,0,0.3)!important; }
+    .st-unstable { color:var(--red)!important;   text-shadow:0 0 10px var(--red)!important;   border-color:rgba(255,48,48,0.3)!important; }
+    .st-none     { color:rgba(0,245,255,0.28)!important; border-color:rgba(0,245,255,0.1)!important; }
+
+    /* No-PSR info box */
+    #no-psr-box {
+      margin-top:10px; padding:10px;
+      border:1px solid rgba(0,245,255,0.14);
+      font-size:10px; letter-spacing:0.1em;
+      color:rgba(0,245,255,0.70); line-height:1.8;
+      display:none;
+    }
+    #no-psr-box .req-highlight {
+      color:var(--amber); font-size:11px;
+    }
+
+    /* ── Legend bottom-center ── */
+    #legend {
+      position:fixed; bottom:24px; left:50%;
+      transform:translateX(-50%);
+      display:flex; gap:20px; align-items:center;
+      background:rgba(4,7,18,0.82); border:1px solid rgba(0,245,255,0.15);
+      padding:8px 18px; z-index:15; pointer-events:none;
+      backdrop-filter:blur(8px);
+    }
+    .leg-item { display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:0.12em; }
+    .leg-swatch { width:18px; height:10px; flex-shrink:0; }
+
+    /* ── Loader ── */
+    #loader {
+      position:fixed; inset:0; z-index:100;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:var(--bg); gap:22px; transition:opacity 1s;
+    }
+    #loader.fade-out { opacity:0; pointer-events:none; }
+    #loader-title {
+      font-family:'Orbitron',monospace;
+      font-size:clamp(22px,5vw,56px); font-weight:900;
+      letter-spacing:0.42em; color:var(--cyan);
+      text-shadow:0 0 28px var(--cyan), 0 0 56px var(--cyan);
+      animation:pulse 2s ease-in-out infinite;
+    }
+    #loader-sub {
+      font-size:clamp(8px,1vw,12px); letter-spacing:0.3em;
+      color:var(--purple); text-shadow:0 0 12px var(--purple);
+      animation:pulse 2s ease-in-out infinite 0.35s;
+    }
+    #loader-bar-wrap { width:clamp(200px,34vw,380px); height:2px; background:rgba(0,245,255,0.12); }
+    #loader-bar {
+      height:100%; background:linear-gradient(90deg,var(--cyan),var(--purple));
+      width:0%; transition:width 0.5s ease; box-shadow:0 0 10px var(--cyan);
+    }
+    #loader-msg { font-size:11px; letter-spacing:0.22em; color:var(--cyan); opacity:0.5; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div id="loader-title">SHADOWHUNTER</div>
+  <div id="loader-sub">PERMANENTLY SHADOWED REGION CALCULATOR</div>
+  <div id="loader-bar-wrap"><div id="loader-bar"></div></div>
+  <div id="loader-msg">INITIALIZING…</div>
+</div>
+
+<!-- Globe -->
+<div id="globe-container"></div>
+<div id="scanlines"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div id="title-bar">
+    <div id="title-main">SHADOWHUNTER</div>
+    <div id="title-sub">PERMANENTLY SHADOWED REGION CALCULATOR</div>
+  </div>
+</div>
+
+<!-- Left panel: Inputs -->
+<div id="left-panel" class="side-panel">
+  <div class="panel-title">BODY &amp; PARAMETERS</div>
+
+  <div class="input-section">
+    <div class="section-label">PRESET BODIES</div>
+    <div class="preset-grid">
+      <button class="preset-btn active" data-preset="mercury">Mercury</button>
+      <button class="preset-btn"        data-preset="moon">Moon</button>
+      <button class="preset-btn"        data-preset="mars">Mars</button>
+      <button class="preset-btn"        data-preset="ceres">Ceres</button>
+      <button class="preset-btn"        data-preset="europa">Europa</button>
+      <button class="preset-btn"        data-preset="custom">Custom</button>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-label">ORBITAL GEOMETRY</div>
+    <div class="param-row">
+      <span class="param-label">OBLIQUITY ε</span>
+      <span><span class="param-value" id="val-obliquity">0.034</span><span class="param-unit">°</span></span>
+    </div>
+    <input type="range" id="sl-obliquity" min="0" max="90" step="0.001" value="0.034">
+    <div class="param-row">
+      <span class="param-label">ECCENTRICITY</span>
+      <span><span class="param-value" id="val-ecc">0.206</span></span>
+    </div>
+    <input type="range" id="sl-ecc" min="0" max="0.95" step="0.001" value="0.206">
+  </div>
+
+  <div class="input-section">
+    <div class="section-label">TOPOGRAPHIC SHIELDING</div>
+    <div class="param-row">
+      <span class="param-label">CRATER d/D RATIO</span>
+      <span><span class="param-value" id="val-dd">0.150</span></span>
+    </div>
+    <input type="range" id="sl-dd" min="0" max="0.40" step="0.001" value="0.150">
+    <div class="param-row">
+      <span class="param-label">SLOPE ANGLE β</span>
+      <span><span class="param-value" id="val-slope">0.0</span><span class="param-unit">°</span></span>
+    </div>
+    <input type="range" id="sl-slope" min="0" max="30" step="0.1" value="0">
+    <div id="horizon-display">
+      <span class="hlabel">HORIZON ANGLE α</span>
+      <span class="hval"><span id="val-horizon">16.7</span>°</span>
+    </div>
+    <div style="font-size:9px;color:rgba(0,245,255,0.48);margin-top:5px;line-height:1.5;letter-spacing:0.1em">
+      α = arctan(2×d/D) + β<br>IF UNKNOWN: SET UNUSED TERM TO 0
+    </div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-label">PHYSICAL PARAMETERS</div>
+    <div class="num-row">
+      <span class="num-label">RADIUS</span>
+      <input type="number" id="inp-radius" value="2439.7" min="1" step="0.1">
+      <span class="param-unit">km</span>
+    </div>
+    <div class="num-row">
+      <span class="num-label">DISTANCE</span>
+      <input type="number" id="inp-dist" value="0.387" min="0.01" step="0.001">
+      <span class="param-unit">AU</span>
+    </div>
+    <div class="param-row">
+      <span class="param-label">BOND ALBEDO</span>
+      <span><span class="param-value" id="val-albedo">0.088</span></span>
+    </div>
+    <input type="range" id="sl-albedo" min="0" max="0.99" step="0.001" value="0.088">
+  </div>
+</div>
+
+<!-- Right panel: Results -->
+<div id="right-panel" class="side-panel">
+  <div class="panel-title">PSR ANALYSIS</div>
+
+  <div id="crit-lat-wrap">
+    <div class="r-lbl" style="text-align:center;margin-bottom:5px;font-size:10px">CRITICAL PSR LATITUDE</div>
+    <div id="crit-lat-val">73.3°</div>
+    <div id="crit-lat-lbl">N &amp; S POLE MINIMUM</div>
+  </div>
+
+  <div class="r-divider"></div>
+
+  <div class="result-row">
+    <span class="r-lbl">PSR AREA (BOTH POLES)</span>
+    <span class="r-val" id="res-area">—</span>
+  </div>
+  <div class="result-row">
+    <span class="r-lbl">% OF SURFACE</span>
+    <span class="r-val" id="res-frac">—</span>
+  </div>
+
+  <div class="r-divider"></div>
+
+  <div class="result-row">
+    <span class="r-lbl">SOLAR CONSTANT</span>
+    <span class="r-val" id="res-solar">—</span>
+  </div>
+  <div class="result-row">
+    <span class="r-lbl">T_EQ (MEAN)</span>
+    <span class="r-val" id="res-teq">—</span>
+  </div>
+  <div class="result-row">
+    <span class="r-lbl">T_PSR (ESTIMATED)</span>
+    <span class="r-val" id="res-tpsr">—</span>
+  </div>
+
+  <div id="ice-box">
+    <div id="ice-lbl">H₂O ICE: STABLE</div>
+    <div id="ice-note">T &lt; 110 K — sublimation negligible</div>
+  </div>
+
+  <div id="no-psr-box"></div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:linear-gradient(to right,#5a00c8,#6e00e8)"></div>
+    <span>PSR ZONE</span>
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:linear-gradient(to right,#00b4f0,#00e8f8)"></div>
+    <span>NEAR-PSR</span>
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:linear-gradient(to right,#ff9000,rgba(255,140,0,0.15))"></div>
+    <span>LOW-SUN POLAR</span>
+  </div>
+  <div class="leg-item" style="color:rgba(0,245,255,0.7)">
+    <div class="leg-swatch" style="background:rgba(0,245,255,0.0);border-bottom:2px solid #00f5ff"></div>
+    <span>CRITICAL LAT RING</span>
+  </div>
+</div>
+
+<script src="https://unpkg.com/globe.gl@2.27.2/dist/globe.gl.min.js"></script>
+<script>
+// ─── PRESET DATA ─────────────────────────────────────────────────────────────
+const PRESETS = {
+  mercury: { obliquity:0.034, ecc:0.206, dd:0.150, slope:0, radius:2439.7,  dist:0.387, albedo:0.088, atm:false, atmColor:'',         rgb:[118,108,102] },
+  moon:    { obliquity:1.54,  ecc:0.055, dd:0.150, slope:0, radius:1737.4,  dist:1.0,   albedo:0.120, atm:false, atmColor:'',         rgb:[108,108,108] },
+  mars:    { obliquity:25.19, ecc:0.093, dd:0.200, slope:0, radius:3389.5,  dist:1.524, albedo:0.250, atm:true,  atmColor:'#cc4422', rgb:[175,78,48]   },
+  ceres:   { obliquity:4.0,   ecc:0.075, dd:0.150, slope:0, radius:473.0,   dist:2.77,  albedo:0.090, atm:false, atmColor:'',         rgb:[82,78,72]    },
+  europa:  { obliquity:0.1,   ecc:0.009, dd:0.080, slope:0, radius:1560.8,  dist:5.204, albedo:0.670, atm:true,  atmColor:'#aabbff', rgb:[210,218,238] },
+  custom:  { obliquity:5.0,   ecc:0.05,  dd:0.150, slope:0, radius:1500.0,  dist:1.5,   albedo:0.15,  atm:false, atmColor:'',         rgb:[108,102,96]  },
+};
+
+// ─── LOADER ───────────────────────────────────────────────────────────────────
+const loaderEl = document.getElementById('loader');
+const lbar = document.getElementById('loader-bar');
+const lmsg = document.getElementById('loader-msg');
+function setLoad(p,m){ lbar.style.width=p+'%'; lmsg.textContent=m; }
+function hideLoader(){ loaderEl.classList.add('fade-out'); setTimeout(()=>loaderEl.style.display='none',1100); }
+setLoad(5,'INITIALIZING…');
+
+// ─── PHYSICS ──────────────────────────────────────────────────────────────────
+function compute(p) {
+  // Crater rim angle + additional slope
+  const craterAngle  = Math.atan(2 * p.dd) * 180 / Math.PI;
+  const horizAngle   = craterAngle + p.slope;
+
+  // Critical latitude: PSRs exist at |φ| > critLat
+  const critLat = 90 + p.obliquity - horizAngle;
+  const hasPSR  = critLat < 90 && critLat >= 0;
+
+  // PSR surface area (both polar caps)
+  const surfArea = 4 * Math.PI * p.radius * p.radius;
+  let psrFrac = 0, psrArea = 0;
+  if (hasPSR) {
+    // Spherical cap area: A = 2πR²(1 − sin φ) per cap × 2 caps
+    psrFrac = 1 - Math.sin(critLat * Math.PI / 180);
+    psrArea = psrFrac * surfArea;
+  }
+
+  // Solar irradiance at mean orbital distance
+  const solarConst = 1361 / (p.dist * p.dist);
+
+  // Equilibrium temperature (fast-rotator model)
+  const tEq = 278.5 * Math.pow(1 - p.albedo, 0.25) / Math.sqrt(p.dist);
+
+  // PSR temperature estimate (empirical fit to Mercury/Moon known values)
+  // T_PSR ≈ T_eq × 0.40 × (α/90)^0.40
+  let tPsr = null;
+  if (hasPSR) {
+    tPsr = tEq * 0.40 * Math.pow(Math.max(horizAngle, 0.5) / 90, 0.40);
+  }
+
+  // Minimum horizon angle needed for ANY PSR at the pole (critLat = 90 → α = ε)
+  const minAlpha    = p.obliquity;
+  const minDD       = Math.max(0, Math.tan(Math.max(0, minAlpha - p.slope) * Math.PI / 180) / 2);
+  const minSlope    = Math.max(0, minAlpha - craterAngle);
+
+  const iceStable   = tPsr !== null && tPsr < 110;
+  const iceMarginal = tPsr !== null && tPsr >= 110 && tPsr < 180;
+
+  return {
+    craterAngle, horizAngle, critLat, hasPSR,
+    psrFrac, psrArea, surfArea, solarConst, tEq, tPsr,
+    iceStable, iceMarginal, minAlpha, minDD, minSlope,
+    obliquity: p.obliquity
+  };
+}
+
+// ─── GLOBE TEXTURE: body color + smooth PSR gradient (row-by-row, no gaps) ───
+let currentRGB = [118,108,102];
+
+function generateGlobeTexture(rgb, result) {
+  const W = 512, H = 256;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const [r, g, b] = rgb;
+  const { horizAngle, critLat, hasPSR, obliquity } = result;
+  const h = horizAngle;
+
+  // Base body color
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.fillRect(0, 0, W, H);
+
+  // Smooth PSR overlay: one pixel row per latitude degree
+  // Color bands are relative to horizAngle so they scale correctly for all bodies
+  for (let py = 0; py < H; py++) {
+    const lat    = 90 - (py / H * 180);  // 90° at top → −90° at bottom
+    const absLat = Math.abs(lat);
+    const elMax  = 90 - absLat + obliquity; // max solar elevation at this lat
+
+    let R = 0, G = 0, B = 0, A = 0;
+
+    if (hasPSR && absLat >= critLat) {
+      // PSR zone: violet-purple, deepens toward the pole
+      const depth = Math.min(1, (absLat - critLat) / Math.max(87 - critLat, 1));
+      R = 90 + depth*20|0;  G = 0;  B = 205 + depth*15|0;
+      A = 0.90;
+    } else if (elMax < h + 8) {
+      // Near-PSR: icy cyan-blue (transitions out from PSR edge)
+      const t = Math.max(0, 1 - (elMax - h) / 8);
+      R = 0;  G = 185 + t*40|0;  B = 240;
+      A = 0.68 * t;
+    } else if (elMax < h + 20) {
+      // Low-sun polar: warm amber
+      const t = Math.max(0, 1 - (elMax - h - 8) / 12);
+      R = 255;  G = 160 + t*30|0;  B = 0;
+      A = 0.52 * t;
+    } else if (elMax < h + 34) {
+      // Outer polar glow: faint amber fade
+      const t = Math.max(0, 1 - (elMax - h - 20) / 14);
+      R = 255;  G = 140;  B = 0;
+      A = 0.15 * t;
+    }
+
+    if (A > 0.008) {
+      ctx.fillStyle = `rgba(${R},${G},${B},${A})`;
+      ctx.fillRect(0, py, W, 1);
+    }
+  }
+
+  return cv.toDataURL('image/jpeg', 0.88);
+}
+
+// ─── LIGHTING FIX: reduce directional (causes top-bright gradient), boost ambient
+function fixGlobeLighting() {
+  globe.scene().traverse(obj => {
+    if (obj.isDirectionalLight) obj.intensity = 0.06;
+    if (obj.isAmbientLight)     obj.intensity = 1.80;
+  });
+}
+
+// ─── CRITICAL LATITUDE RINGS (paths) ─────────────────────────────────────────
+function buildLatRings(critLat, hasPSR) {
+  if (!hasPSR || critLat >= 89) return [];
+  const rings = [];
+  for (const lat of [critLat, -critLat]) {
+    const coords = [];
+    for (let lng=-180; lng<=180; lng+=2) coords.push([Math.min(lng,180), lat]);
+    rings.push({ type:'Feature', geometry:{ type:'LineString', coordinates:coords }, properties:{} });
+  }
+  return rings;
+}
+
+// ─── FORMAT HELPERS ───────────────────────────────────────────────────────────
+function fmtArea(km2) {
+  if (km2 >= 1e6) return (km2/1e6).toFixed(2)+' ×10⁶ km²';
+  if (km2 >= 1e3) return (km2/1e3).toFixed(1)+' ×10³ km²';
+  return km2.toFixed(0)+' km²';
+}
+function fmtSolar(s) {
+  return s >= 1000 ? (s/1000).toFixed(2)+' kW/m²' : s.toFixed(1)+' W/m²';
+}
+
+// ─── UPDATE RESULTS PANEL ─────────────────────────────────────────────────────
+function updateResults(res) {
+  const { critLat, hasPSR, psrFrac, psrArea, solarConst, tEq, tPsr,
+          iceStable, iceMarginal, minAlpha, minDD, minSlope } = res;
+
+  const clv = document.getElementById('crit-lat-val');
+  const noPsrBox = document.getElementById('no-psr-box');
+
+  if (hasPSR) {
+    clv.textContent = critLat.toFixed(1)+'°';
+    clv.style.color = 'var(--cyan)';
+    clv.style.textShadow = '0 0 22px var(--cyan)';
+    document.getElementById('res-area').textContent = fmtArea(psrArea);
+    document.getElementById('res-frac').textContent = (psrFrac*100).toFixed(2)+'%';
+    document.getElementById('res-tpsr').textContent = Math.round(tPsr)+' K';
+    noPsrBox.style.display = 'none';
+  } else {
+    clv.textContent = '—';
+    clv.style.color = 'rgba(0,245,255,0.28)';
+    clv.style.textShadow = 'none';
+    document.getElementById('res-area').textContent = '—';
+    document.getElementById('res-frac').textContent = '—';
+    document.getElementById('res-tpsr').textContent = '—';
+    noPsrBox.style.display = 'block';
+    noPsrBox.innerHTML =
+      `NO PSR WITH CURRENT PARAMETERS<br><br>`+
+      `MINIMUM HORIZON ANGLE NEEDED:<br><span class="req-highlight">α ≥ ${minAlpha.toFixed(2)}°</span><br><br>`+
+      `REQUIRES EITHER:<br>`+
+      `d/D > <span class="req-highlight">${minDD.toFixed(3)}</span><br>`+
+      `OR SLOPE > <span class="req-highlight">${minSlope.toFixed(1)}°</span>`;
+  }
+
+  document.getElementById('res-solar').textContent = fmtSolar(solarConst);
+  document.getElementById('res-teq').textContent   = Math.round(tEq)+' K';
+
+  const iceBox = document.getElementById('ice-box');
+  const iceLbl = document.getElementById('ice-lbl');
+  const iceNote= document.getElementById('ice-note');
+  iceBox.className = '';
+  if (!hasPSR) {
+    iceBox.classList.add('st-none');
+    iceLbl.textContent = 'H₂O ICE: N/A';
+    iceNote.textContent = 'No PSR exists';
+  } else if (iceStable) {
+    iceBox.classList.add('st-stable');
+    iceLbl.textContent = 'H₂O ICE: STABLE';
+    iceNote.textContent = `T ≈ ${Math.round(tPsr)} K — sublimation negligible`;
+  } else if (iceMarginal) {
+    iceBox.classList.add('st-marginal');
+    iceLbl.textContent = 'H₂O ICE: MARGINAL';
+    iceNote.textContent = `T ≈ ${Math.round(tPsr)} K — some sublimation`;
+  } else {
+    iceBox.classList.add('st-unstable');
+    iceLbl.textContent = 'H₂O ICE: UNSTABLE';
+    iceNote.textContent = `T ≈ ${Math.round(tPsr)} K — rapid sublimation`;
+  }
+}
+
+// ─── GLOBE ────────────────────────────────────────────────────────────────────
+let globe;
+let debounceTimer;
+
+function initGlobe() {
+  globe = Globe({ animateIn:false })
+    (document.getElementById('globe-container'))
+    .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+    .showAtmosphere(false)
+    .width(window.innerWidth)
+    .height(window.innerHeight);
+
+  globe.controls().autoRotate      = false;
+  globe.controls().enableDamping   = true;
+  globe.controls().dampingFactor   = 0.08;
+  // Start looking at the north polar region
+  globe.pointOfView({ lat:72, lng:0, altitude:2.1 });
+
+  window.addEventListener('resize', () => globe.width(window.innerWidth).height(window.innerHeight));
+}
+
+function getParams() {
+  return {
+    obliquity: parseFloat(document.getElementById('sl-obliquity').value),
+    ecc:       parseFloat(document.getElementById('sl-ecc').value),
+    dd:        parseFloat(document.getElementById('sl-dd').value),
+    slope:     parseFloat(document.getElementById('sl-slope').value),
+    radius:    parseFloat(document.getElementById('inp-radius').value) || 1000,
+    dist:      parseFloat(document.getElementById('inp-dist').value)   || 1,
+    albedo:    parseFloat(document.getElementById('sl-albedo').value),
+  };
+}
+
+function updateAll() {
+  const params = getParams();
+  const craterAngle = Math.atan(2*params.dd) * 180/Math.PI;
+  const horizAngle  = craterAngle + params.slope;
+  document.getElementById('val-horizon').textContent = horizAngle.toFixed(1);
+
+  const result = compute(params);
+  updateResults(result);
+
+  // Combined body-color + smooth PSR gradient as globe texture (no polygon gaps)
+  globe.globeImageUrl(generateGlobeTexture(currentRGB, result));
+
+  // Clear any residual polygons
+  globe.polygonsData([]);
+
+  // Critical latitude rings
+  const rings = buildLatRings(result.critLat, result.hasPSR);
+  globe
+    .pathsData(rings)
+    .pathPoints(d => d.geometry.coordinates)
+    .pathPointLat(p => p[1])
+    .pathPointLng(p => p[0])
+    .pathColor(() => '#00f5ff')
+    .pathStroke(1.8)
+    .pathTransitionDuration(0);
+}
+
+function debouncedUpdate() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(updateAll, 110);
+}
+
+// ─── PRESET APPLICATION ────────────────────────────────────────────────────────
+function applyPreset(name) {
+  const p = PRESETS[name];
+  document.querySelectorAll('.preset-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.preset === name));
+
+  const set = (id, val, dec) => {
+    const el = document.getElementById(id);
+    if (el.tagName === 'INPUT' && el.type === 'range') {
+      el.value = val;
+      const vid = id.replace('sl-','val-');
+      const vEl = document.getElementById(vid);
+      if (vEl) vEl.textContent = parseFloat(val).toFixed(dec);
+    } else {
+      el.value = val;
+    }
+  };
+
+  set('sl-obliquity', p.obliquity, 3);
+  set('sl-ecc',       p.ecc,       3);
+  set('sl-dd',        p.dd,        3);
+  set('sl-slope',     p.slope,     1);
+  set('sl-albedo',    p.albedo,    3);
+  document.getElementById('inp-radius').value = p.radius;
+  document.getElementById('inp-dist').value   = p.dist;
+
+  // Store body color for texture generation in updateAll
+  currentRGB = p.rgb;
+
+  // Atmosphere
+  if (p.atm) {
+    globe.showAtmosphere(true).atmosphereColor(p.atmColor).atmosphereAltitude(0.12);
+  } else {
+    globe.showAtmosphere(false);
+  }
+
+  updateAll();
+}
+
+// ─── EVENT WIRING ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.preset-btn').forEach(btn =>
+  btn.addEventListener('click', () => applyPreset(btn.dataset.preset)));
+
+[
+  ['sl-obliquity','val-obliquity',3],
+  ['sl-ecc',      'val-ecc',      3],
+  ['sl-dd',       'val-dd',       3],
+  ['sl-slope',    'val-slope',    1],
+  ['sl-albedo',   'val-albedo',   3],
+].forEach(([sid,vid,dec]) => {
+  document.getElementById(sid).addEventListener('input', e => {
+    document.getElementById(vid).textContent = parseFloat(e.target.value).toFixed(dec);
+    debouncedUpdate();
+  });
+});
+
+['inp-radius','inp-dist'].forEach(id =>
+  document.getElementById(id).addEventListener('input', debouncedUpdate));
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+setLoad(20,'BUILDING GLOBE…');
+initGlobe();
+setLoad(55,'LOADING TEXTURES…');
+setTimeout(() => {
+  setLoad(82,'APPLYING MERCURY PARAMETERS…');
+  applyPreset('mercury');
+  fixGlobeLighting();
+  setLoad(100,'SYSTEM ONLINE');
+  setTimeout(hideLoader, 400);
+}, 800);
+</script>
+</body>
+</html>
+
+
+
