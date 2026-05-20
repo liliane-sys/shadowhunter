@@ -8,7 +8,7 @@
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SHADOWHUNTER — PSR Calculator</title>
+  <title>SHADOWHUNTER - PSR Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -416,7 +416,7 @@
     <span>LOW-SUN POLAR</span>
   </div>
   <div class="leg-item" style="color:rgba(0,245,255,0.7)">
-    <div class="leg-swatch" style="background:rgba(0,245,255,0.0);border-bottom:2px solid #00f5ff"></div>
+    <div class="leg-swatch" style="background:rgba(0,245,255,0.0);border-bottom:3px solid rgba(245,40,145,0.8)"></div>
     <span>CRITICAL LAT RING</span>
   </div>
 </div>
@@ -441,7 +441,7 @@ function setLoad(p,m){ lbar.style.width=p+'%'; lmsg.textContent=m; }
 function hideLoader(){ loaderEl.classList.add('fade-out'); setTimeout(()=>loaderEl.style.display='none',1100); }
 setLoad(5,'INITIALIZING…');
 
-// ─── PHYSICS ──────────────────────────────────────────────────────────────────
+// ─── PHYSICS ─────────────────────────────────────────────────────────────────
 function compute(p) {
   // Crater rim angle + additional slope
   const craterAngle  = Math.atan(2 * p.dd) * 180 / Math.PI;
@@ -493,7 +493,7 @@ function compute(p) {
 let currentRGB = [118,108,102];
 
 function generateGlobeTexture(rgb, result) {
-  const W = 512, H = 256;
+  const W = 4096, H = 2048;
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -505,7 +505,7 @@ function generateGlobeTexture(rgb, result) {
   ctx.fillStyle = `rgb(${r},${g},${b})`;
   ctx.fillRect(0, 0, W, H);
 
-  // Smooth PSR overlay: one pixel row per latitude degree
+  // Smooth PSR overlay: One pixel row per latitude degree
   // Color bands are relative to horizAngle so they scale correctly for all bodies
   for (let py = 0; py < H; py++) {
     const lat    = 90 - (py / H * 180);  // 90° at top → −90° at bottom
@@ -542,7 +542,25 @@ function generateGlobeTexture(rgb, result) {
     }
   }
 
-  return cv.toDataURL('image/jpeg', 0.88);
+  // Latitude labels baked into texture at 5°E longitude
+  const labelData = [
+    { lat: 60,  text: '60°N' },
+    { lat: 30,  text: '30°N' },
+    { lat: 0,   text: '0°'   },
+    { lat: -30, text: '30°S' },
+    { lat: -60, text: '60°S' },
+  ];
+  const lx = (5 + 180) / 360 * W + 3;
+  ctx.font = '28px monospace';
+  ctx.fillStyle = 'rgba(20,20,20,0.88)';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  for (const { lat, text } of labelData) {
+    const ly = (90 - lat) / 180 * H;
+    ctx.fillText(text, lx, ly);
+  }
+
+  return cv.toDataURL('image/png');
 }
 
 // ─── LIGHTING FIX: reduce directional (causes top-bright gradient), boost ambient
@@ -560,7 +578,7 @@ function buildLatRings(critLat, hasPSR) {
   for (const lat of [critLat, -critLat]) {
     const coords = [];
     for (let lng=-180; lng<=180; lng+=2) coords.push([Math.min(lng,180), lat]);
-    rings.push({ type:'Feature', geometry:{ type:'LineString', coordinates:coords }, properties:{} });
+    rings.push({ type:'Feature', geometry:{ type:'LineString', coordinates:coords }, properties:{ grat:false } });
   }
   return rings;
 }
@@ -649,7 +667,7 @@ function initGlobe() {
   globe.controls().enableDamping   = true;
   globe.controls().dampingFactor   = 0.08;
   // Start looking at the north polar region
-  globe.pointOfView({ lat:72, lng:0, altitude:2.1 });
+  globe.pointOfView({ lat:30, lng:0, altitude:2.1 });
 
   window.addEventListener('resize', () => globe.width(window.innerWidth).height(window.innerHeight));
 }
@@ -664,6 +682,23 @@ function getParams() {
     dist:      parseFloat(document.getElementById('inp-dist').value)   || 1,
     albedo:    parseFloat(document.getElementById('sl-albedo').value),
   };
+}
+
+function makeGraticuleLines() {
+  const lines = [];
+  // Latitude parallels every 30°
+  for (const lat of [-60, -30, 0, 30, 60]) {
+    const coords = [];
+    for (let lng = -180; lng <= 180; lng += 5) coords.push([Math.min(lng, 180), lat]);
+    lines.push({ type:'Feature', geometry:{ type:'LineString', coordinates:coords }, properties:{ grat:true } });
+  }
+  // Longitude meridians every 45°
+  for (let lng = -135; lng <= 180; lng += 45) {
+    const coords = [];
+    for (let lat = -88; lat <= 88; lat += 5) coords.push([lng, lat]);
+    lines.push({ type:'Feature', geometry:{ type:'LineString', coordinates:coords }, properties:{ grat:true } });
+  }
+  return lines;
 }
 
 function updateAll() {
@@ -681,15 +716,16 @@ function updateAll() {
   // Clear any residual polygons
   globe.polygonsData([]);
 
-  // Critical latitude rings
+  // Critical latitude rings + graticule grid (rings first = rendered on top)
   const rings = buildLatRings(result.critLat, result.hasPSR);
+  const grat  = makeGraticuleLines();
   globe
-    .pathsData(rings)
+    .pathsData([...rings, ...grat])
     .pathPoints(d => d.geometry.coordinates)
     .pathPointLat(p => p[1])
     .pathPointLng(p => p[0])
-    .pathColor(() => '#00f5ff')
-    .pathStroke(1.8)
+    .pathColor(d => d.properties.grat ? 'rgba(90,90,90,0.90)' : 'rgba(245,40,145,0.8)')
+    .pathStroke(d => d.properties.grat ? 0.6 : 3.5)
     .pathTransitionDuration(0);
 }
 
@@ -757,7 +793,7 @@ document.querySelectorAll('.preset-btn').forEach(btn =>
 ['inp-radius','inp-dist'].forEach(id =>
   document.getElementById(id).addEventListener('input', debouncedUpdate));
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ─── INIT ───────────────────────────────────────────────────────────────────
 setLoad(20,'BUILDING GLOBE…');
 initGlobe();
 setLoad(55,'LOADING TEXTURES…');
@@ -771,6 +807,5 @@ setTimeout(() => {
 </script>
 </body>
 </html>
-
 
 
