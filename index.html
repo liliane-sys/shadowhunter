@@ -8,7 +8,7 @@
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SHADOWHUNTER - PSR Calculator</title>
+  <title>SHADOWHUNTER — PSR Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -603,8 +603,8 @@ function updateResults(res) {
 
   if (hasPSR) {
     clv.textContent = critLat.toFixed(1)+'°';
-    clv.style.color = 'var(--cyan)';
-    clv.style.textShadow = '0 0 22px var(--cyan)';
+    clv.style.color = 'rgba(245,40,145,0.95)';
+    clv.style.textShadow = '0 0 22px rgba(245,40,145,0.95)';
     document.getElementById('res-area').textContent = fmtArea(psrArea);
     document.getElementById('res-frac').textContent = (psrFrac*100).toFixed(2)+'%';
     document.getElementById('res-tpsr').textContent = Math.round(tPsr)+' K';
