@@ -98,6 +98,7 @@ This tool implements a **first-principles geometric model** and is intended for 
 - The equilibrium temperature formula assumes a fast rotator. Slowly rotating bodies (e.g. Mercury with its 3:2 spin-orbit resonance) have a more complex thermal environment.
 - The PSR temperature estimate is empirical and does not account for conduction, internal heat sources (relevant for Europa's tidal heating), or regolith thermal inertia.
 - The model assumes a spherical body. Real topography creates PSRs at latitudes well below the theoretical critical latitude on bodies with rugged polar terrain.
+- Linear slope addition assumes a 2D worst-case geometry. In a true 3D environment, the solar azimuth rotates relative to the slope direction throughout the day.
 - Orbital eccentricity is accepted as input but does not currently modify the PSR latitude calculation (which assumes mean orbital distance). High eccentricity slightly shifts the insolation pattern; this is a planned refinement.
 
 ---
