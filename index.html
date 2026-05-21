@@ -473,7 +473,8 @@ function compute(p) {
   // and Moon PSRs (~59 K, observed 50–100 K)
   let tPsr = null;
   if (hasPSR) {
-    tPsr = tEq * 0.25 * Math.pow(Math.max(1 - horizAngle / 90, 0.001), 0.40);
+    const aEff = Math.min(Math.max(horizAngle, 0), 89.9);
+    tPsr = tEq * 0.25 * Math.pow(1 - aEff / 90, 0.40);
   }
 
   // Minimum horizon angle needed for ANY PSR at the pole (critLat = 90 → α = ε)
