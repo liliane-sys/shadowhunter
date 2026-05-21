@@ -8,7 +8,7 @@
 
 **Shadowhunter** is an interactive browser-based tool for computing and visualizing Permanently Shadowed Regions (PSRs) on planetary bodies. Given a set of orbital and physical parameters, the tool calculates the critical latitude above which crater floors or sloped terrain can remain in permanent shadow throughout a full orbital period and estimates whether those regions are cold enough to trap and preserve water ice.
 
-The tool runs entirely in the browser, requires no installation and updates in real time as parameters are adjusted. It includes presets for Mercury, the Moon, Mars, Ceres, and Europa, and supports fully custom planetary configurations.
+The tool runs entirely in the browser, requires no installation and updates in real time as parameters are adjusted. It includes presets for Mercury, the Moon, Mars, Ceres and Europa, and supports fully custom planetary configurations.
 
 ---
 
@@ -16,7 +16,7 @@ The tool runs entirely in the browser, requires no installation and updates in r
 
 ### What is a Permanently Shadowed Region?
 
-A Permanently Shadowed Region is a surface location that never receives direct sunlight over a complete orbital period. On airless or thin-atmosphere bodies, these regions can remain extraordinarily cold; cold enough to act as cold traps for volatiles such as water ice, CO₂, SO₂, and other compounds that would otherwise sublimate.
+A Permanently Shadowed Region is a surface location that never receives direct sunlight over a complete orbital period. On airless or thin-atmosphere bodies, these regions can remain extraordinarily cold; cold enough to act as cold traps for volatiles such as water ice, CO₂, SO₂ and other compounds that would otherwise sublimate.
 
 PSRs are not simply 'dark craters': Their existence depends on a precise geometric relationship between the body's axial tilt, the local topography and orbital geometry.
 
@@ -50,7 +50,7 @@ Setting el_max = α and solving for φ gives the **critical PSR latitude**:
 φ_PSR = 90° + ε − α
 ```
 
-All surface locations with |φ| ≥ φ_PSR can host PSRs if they have the appropriate topography. Locations below this latitude receive enough direct sunlight at some point in the orbit to prevent permanent shadowing, regardless of local topography.
+All surface locations with |φ| ≥ φ_PSR can host PSRs if they have the appropriate topography. Locations below this latitude receive direct sunlight at some point in the orbit to prevent permanent shadowing; however, extreme local topography could still create shadows at lower latitudes.
 
 Note that φ_PSR is a *necessary* condition: It defines where PSRs are geometrically *possible*, not where they universally exist. Actual PSR coverage depends on the detailed topography at each location.
 
@@ -81,10 +81,10 @@ where A is the Bond albedo and d is the orbital distance in AU. This is the stan
 **PSR temperature** is estimated empirically as:
 
 ```
-T_PSR ≈ T_eq × 0.40 × (α / 90°)^0.40
+T_PSR ≈ T_eq × 0.25 × (1 − α / 90°)^0.40
 ```
 
-This formula is calibrated against known values for Mercury's PSRs (~80–100 K at 0.387 AU) and the Moon's PSRs (~50–100 K at 1.0 AU), and produces physically reasonable results across the range of bodies included in the presets. It accounts for the fact that deeper topographic shielding (larger α) produces colder PSRs by reducing the indirect thermal flux from surrounding illuminated terrain.
+Deeper topographic shielding (larger α) produces colder PSRs by reducing the indirect thermal flux from surrounding illuminated terrain; the multiplier decreases as α increases, giving the correct physical trend. The coefficient 0.25 is calibrated against known values: Mercury's PSRs (~101 K predicted, 80–100 K observed at 0.387 AU) and the Moon's PSRs (~59 K predicted, 50–100 K observed at 1.0 AU). At α = 0° the formula yields 0.25 × T_eq (indirect heating baseline with no topographic shielding); at α = 90° (complete horizon blockage) T_PSR approaches 0 K as a theoretical limit.
 
 **Water ice stability** is assessed against the following thresholds:
 - **Stable** (T < 110 K): sublimation rate negligible on geological timescales
