@@ -54,7 +54,7 @@ All surface locations with |φ| ≥ φ_PSR can host PSRs if they have the approp
 
 Note that φ_PSR is a *necessary* condition: It defines where PSRs are geometrically *possible*, not where they universally exist. Actual PSR coverage depends on the detailed topography at each location.
 
-### PSR Surface Area
+### PSR-Capable Surface Area
 
 The total surface area capable of hosting PSRs (both polar caps combined) is computed using the spherical cap formula:
 
@@ -135,7 +135,7 @@ The globe displays a latitude-dependent color overlay representing the local ill
 
 | Color | Zone | Meaning |
 |---|---|---|
-| **Purple** | PSR Zone | φ ≥ φ_PSR : permanent shadow possible with the specified topography |
+| **Purple** | PSR Zone | |φ| ≥ φ_PSR : permanent shadow possible with the specified topography |
 | **Cyan-blue** | Near-PSR | Sun grazes the horizon; shallow topography may create local PSRs |
 | **Amber** | Low-sun polar | Low solar elevation; significant polar cooling but no permanent shadow |
 | **Pink dashed ring** | Critical latitude | φ_PSR : boundary of the PSR-capable zone |
