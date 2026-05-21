@@ -135,7 +135,7 @@ The globe displays a latitude-dependent color overlay representing the local ill
 
 | Color | Zone | Meaning |
 |---|---|---|
-| **Purple** | PSR Zone | |φ| ≥ φ_PSR : permanent shadow possible with the specified topography |
+| **Purple** | PSR Zone | '|φ| ≥ φ_PSR' : permanent shadow possible with the specified topography |
 | **Cyan-blue** | Near-PSR | Sun grazes the horizon; shallow topography may create local PSRs |
 | **Amber** | Low-sun polar | Low solar elevation; significant polar cooling but no permanent shadow |
 | **Pink dashed ring** | Critical latitude | φ_PSR : boundary of the PSR-capable zone |
