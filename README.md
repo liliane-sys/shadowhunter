@@ -134,10 +134,10 @@ The globe displays a latitude-dependent color overlay representing the local ill
 
 | Color | Zone | Meaning |
 |---|---|---|
-| **Purple** | PSR Zone | |φ| ≥ φ_PSR — permanent shadow possible with the specified topography |
+| **Purple** | PSR Zone | φ ≥ φ_PSR : permanent shadow possible with the specified topography |
 | **Cyan-blue** | Near-PSR | Sun grazes the horizon; shallow topography may create local PSRs |
 | **Amber** | Low-sun polar | Low solar elevation; significant polar cooling but no permanent shadow |
-| **Pink dashed ring** | Critical latitude | φ_PSR — the boundary of the PSR-capable zone |
+| **Pink dashed ring** | Critical latitude | φ_PSR : boundary of the PSR-capable zone |
 
 The globe uses an equirectangular canvas texture updated in real time as parameters change. Lighting is uniform (no directional shading) to ensure the body color represents albedo rather than illumination geometry.
 
