@@ -84,7 +84,7 @@ where A is the Bond albedo and d is the orbital distance in AU. This is the stan
 T_PSR ≈ T_eq × 0.25 × (1 − α / 90°)^0.40
 ```
 
-Deeper topographic shielding (larger α) produces colder PSRs by reducing the indirect thermal flux from surrounding illuminated terrain; the multiplier decreases as α increases, giving the correct physical trend. The coefficient 0.25 is calibrated against known values: Mercury's PSRs (~101 K predicted, 80–100 K observed at 0.387 AU) and the Moon's PSRs (~59 K predicted, 50–100 K observed at 1.0 AU). At α = 0° the formula yields 0.25 × T_eq (indirect heating baseline with no topographic shielding); at α = 90° (complete horizon blockage) T_PSR approaches 0 K as a theoretical limit.
+Deeper topographic shielding (larger α) produces colder PSRs by reducing the indirect thermal flux from surrounding illuminated terrain; the multiplier decreases as α increases, giving the correct physical trend. The coefficient 0.25 is calibrated against known values: Mercury's PSRs (~101 K predicted, 80–100 K observed at 0.387 AU) and the Moon's PSRs (~59 K predicted, 50–100 K observed at 1.0 AU). At α = 0° the formula yields 0.25 × T_eq (indirect heating baseline with no topographic shielding); at α = 90° (complete horizon blockage) T_PSR approaches 0 K as a theoretical limit. The horizon angle is clamped to (0°, 89.9°) before evaluation to ensure mathematically valid real-valued output; values outside this range have no physical meaning for this model.
 
 **Water ice stability** is assessed against the following thresholds:
 - **Stable** (T < 110 K): sublimation rate negligible on geological timescales
