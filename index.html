@@ -466,11 +466,14 @@ function compute(p) {
   // Equilibrium temperature (fast-rotator model)
   const tEq = 278.5 * Math.pow(1 - p.albedo, 0.25) / Math.sqrt(p.dist);
 
-  // PSR temperature estimate (empirical fit to Mercury/Moon known values)
-  // T_PSR ≈ T_eq × 0.40 × (α/90)^0.40
+ // PSR temperature estimate (empirical fit to Mercury/Moon known values)
+  // T_PSR ≈ T_eq × 0.25 × (1 − α/90°)^0.40
+  // Larger horizon angle = deeper shielding = colder PSR (correct physical trend)
+  // Coefficient 0.25 calibrated to match Mercury PSRs (~101 K, observed 80–100 K)
+  // and Moon PSRs (~59 K, observed 50–100 K)
   let tPsr = null;
   if (hasPSR) {
-    tPsr = tEq * 0.40 * Math.pow(Math.max(horizAngle, 0.5) / 90, 0.40);
+    tPsr = tEq * 0.25 * Math.pow(Math.max(1 - horizAngle / 90, 0.001), 0.40);
   }
 
   // Minimum horizon angle needed for ANY PSR at the pole (critLat = 90 → α = ε)
