@@ -13,6 +13,13 @@ The tool runs entirely in the browser, requires no installation and updates in r
 Go to website: [SHADOWHUNTER](https://liliane-sys.github.io/shadowhunter/)
 ---
 
+## Preview
+
+![Shadowhunter Screenshot](screenshot_s.png)
+
+---
+
+
 ## The Physics
 
 ### What is a Permanently Shadowed Region?
