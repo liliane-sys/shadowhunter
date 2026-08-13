@@ -52,15 +52,38 @@ A surface element at latitude φ, with horizon angle α, is permanently shadowed
 el_max(φ) = 90° − |φ| + ε
 ```
 
-Setting el_max = α and solving for φ gives the **critical PSR latitude**:
+Permanent shadow, however, is broken by direct sunlight from *any* part of the solar disk, so the relevant quantity is the elevation of the **upper limb** of the Sun. The disk has an apparent angular radius θ☉ = arcsin(R☉/r), which is largest at perihelion:
 
 ```
-φ_PSR = 90° + ε − α
+θ☉ = arcsin( R☉ / [a(1 − e)] )
 ```
+
+where R☉ = 0.00465 AU is the solar radius, a the semi-major axis and e the orbital eccentricity. Setting el_max + θ☉ = α and solving for φ gives the **critical PSR latitude**:
+
+```
+φ_PSR = 90° + ε + θ☉ − α
+````
 
 All surface locations with |φ| ≥ φ_PSR can host PSRs if they have the appropriate topography. Locations below this latitude receive direct sunlight at some point in the orbit to prevent permanent shadowing; however, extreme local topography could still create shadows at lower latitudes.
 
 Note that φ_PSR is a *necessary* condition: It defines where PSRs are geometrically *possible*, not where they universally exist. Actual PSR coverage depends on the detailed topography at each location.
+
+### Orbital Eccentricity Effects
+
+Eccentricity enters the model through two physically distinct channels:
+
+**1. Geometric (via the solar disk size).** The angular radius of the Sun scales inversely with heliocentric distance, so at perihelion — r = a(1 − e) — the disk appears largest and its upper limb reaches highest above the geometric solar elevation. This raises φ_PSR by θ☉ and shrinks the PSR-capable zone. The effect is far from negligible for eccentric orbits close to the Sun: for Mercury (e = 0.206, a = 0.387 AU), θ☉ ≈ 0.87° at perihelion; roughly **25 times larger than Mercury's obliquity** (0.034°), making the finite solar disk, not the axial tilt, the dominant term limiting Mercury's PSR extent in this model. For the Moon θ☉ ≈ 0.28°, comparable to lunar obliquity effects at the ~20% level.
+
+Because permanence must hold over *all* epochs, θ☉ is evaluated at perihelion, i.e. the model assumes polar summer solstice can coincide with perihelion. For most bodies the argument of perihelion precesses over 10⁴–10⁵ year timescales, so this alignment recurs and the worst-case choice is the correct conservative one for permanent shadow. For a fixed present-day orbital configuration it may slightly overstate the effect.
+
+**2. Thermal (via orbit-averaged insolation).** The time average of the inverse-square insolation over one Keplerian orbit is
+
+```
+⟨1/r²⟩ = 1 / (a² √(1 − e²))
+```
+
+(a consequence of conservation of angular momentum), so the equilibrium temperature scales by (1 − e²)^(−1/8) relative to the circular-orbit value. This is a small correction (+0.5% for Mercury, <0.1% for the other presets) but is now included for consistency. The tool additionally reports the instantaneous solar flux at perihelion and aphelion, whose ratio [(1+e)/(1−e)]² reaches ≈2.3 for Mercury.
+
 
 ### PSR-Capable Surface Area
 
@@ -78,13 +101,13 @@ f_PSR = 1 − sin φ_PSR
 
 ### Temperature Estimates
 
-**Equilibrium temperature** (mean surface temperature of a rapidly rotating body):
+**Equilibrium temperature** (mean surface temperature of a rapidly rotating body, using orbit-averaged insolation):
 
 ```
-T_eq = 278.5 × (1 − A)^0.25 / √d   [K]
+T_eq = 278.5 × (1 − A)^0.25 / √a × (1 − e²)^(−1/8)   [K]
 ```
 
-where A is the Bond albedo and d is the orbital distance in AU. This is the standard fast-rotator approximation assuming re-radiation over the full sphere.
+where A is the Bond albedo, a is the semi-major axis in AU and e is the orbital eccentricity. This is the standard fast-rotator approximation assuming re-radiation over the full sphere; the (1 − e²)^(−1/8) factor accounts for the slightly higher time-averaged insolation on an eccentric orbit (see *Orbital Eccentricity Effects* above).
 
 **PSR temperature** is estimated empirically as:
 
@@ -107,7 +130,8 @@ This tool implements a **first-principles geometric model** and is intended for 
 - The PSR temperature estimate is empirical and does not account for conduction, internal heat sources (relevant for Europa's tidal heating), or regolith thermal inertia.
 - The model assumes a spherical body. Real topography creates PSRs at latitudes well below the theoretical critical latitude on bodies with rugged polar terrain.
 - Linear slope addition assumes a 2D worst-case geometry. In a true 3D environment, the solar azimuth rotates relative to the slope direction throughout the day.
-- Orbital eccentricity is accepted as input but does not currently modify the PSR latitude calculation (which assumes mean orbital distance). High eccentricity slightly shifts the insolation pattern; this is a planned refinement.
+- Orbital eccentricity enters through the solar disk size at perihelion (geometric, raises φ_PSR) and the orbit-averaged insolation (thermal, scales T_eq). The θ☉ term conservatively assumes polar summer solstice can coincide with perihelion; correct for permanence over precession cycles, but possibly an overestimate for a fixed present-day orbital configuration.
+- Kepler timing asymmetries (the body spends more time near aphelion than perihelion) affect the *duration* of illumination episodes but not their existence, and are not modeled. Spin–orbit resonances such as Mercury's longitude-dependent 'hot poles' (3:2 resonance) are likewise not modeled.
 
 ---
 
@@ -116,7 +140,7 @@ This tool implements a **first-principles geometric model** and is intended for 
 | Parameter | Symbol | Description |
 |---|---|---|
 | Obliquity | ε | Axial tilt relative to the orbital plane (degrees). The single most important factor controlling PSR extent. |
-| Eccentricity | e | Orbital eccentricity. Currently displayed for reference; affects solar constant at perihelion/aphelion. |
+| Eccentricity | e | Orbital eccentricity. Sets the perihelion distance a(1−e), which controls the solar disk angular radius θ☉ (raising φ_PSR), the orbit-averaged equilibrium temperature and the perihelion/aphelion flux extremes. |
 | Crater d/D ratio | d/D | Depth-to-diameter ratio of a representative crater. Typical values: 0.10–0.20 for fresh craters. |
 | Slope angle | β | Additional pole-facing terrain slope (degrees). Set to 0 if unknown. |
 | Body radius | R | Mean radius of the body in km. Used for PSR area calculation. |
