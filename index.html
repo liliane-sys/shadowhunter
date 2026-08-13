@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <!--
-    SHADOWHUNTER — Permanently Shadowed Region Calculator
+    SHADOWHUNTER - Permanently Shadowed Region Calculator
     by Liliane ML Burkhard
     2026
   -->
@@ -317,6 +317,9 @@
       <span><span class="param-value" id="val-ecc">0.206</span></span>
     </div>
     <input type="range" id="sl-ecc" min="0" max="0.95" step="0.001" value="0.206">
+    <div style="font-size:9px;color:rgba(0,245,255,0.48);margin-top:2px;line-height:1.5;letter-spacing:0.1em">
+      e SETS PERIHELION DISTANCE → SOLAR DISK θ☉ &amp; PEAK FLUX
+    </div>
   </div>
 
   <div class="input-section">
@@ -366,7 +369,7 @@
 
   <div id="crit-lat-wrap">
     <div class="r-lbl" style="text-align:center;margin-bottom:5px;font-size:10px">CRITICAL PSR LATITUDE</div>
-    <div id="crit-lat-val">73.3°</div>
+    <div id="crit-lat-val">74.2°</div>
     <div id="crit-lat-lbl">N &amp; S POLE MINIMUM</div>
   </div>
 
@@ -384,11 +387,19 @@
   <div class="r-divider"></div>
 
   <div class="result-row">
-    <span class="r-lbl">SOLAR CONSTANT</span>
+    <span class="r-lbl">SOLAR CONST (MEAN)</span>
     <span class="r-val" id="res-solar">—</span>
   </div>
   <div class="result-row">
-    <span class="r-lbl">T_EQ (MEAN)</span>
+    <span class="r-lbl">S PERI / APH</span>
+    <span class="r-val" id="res-speri">—</span>
+  </div>
+  <div class="result-row">
+    <span class="r-lbl">θ☉ AT PERIHELION</span>
+    <span class="r-val" id="res-sunang">—</span>
+  </div>
+  <div class="result-row">
+    <span class="r-lbl">T_EQ (ORBIT-AVG)</span>
     <span class="r-val" id="res-teq">—</span>
   </div>
   <div class="result-row">
@@ -571,15 +582,25 @@
       <p>where <strong>d/D</strong> is the crater depth-to-diameter ratio and <strong>β</strong> is an additional pole-facing slope angle. If only one term is known, set the other to zero.</p>
 
       <h3>The Critical PSR Latitude</h3>
-      <p>The maximum solar elevation at latitude φ on a body with axial tilt ε occurs at summer solstice:</p>
+      <p>The maximum elevation of the <em>center</em> of the solar disk at latitude φ on a body with axial tilt ε occurs at summer solstice:</p>
       <code>el_max(φ) = 90° − |φ| + ε</code>
-      <p>Setting el_max = α and solving for φ gives the <strong>critical PSR latitude</strong>:</p>
-      <code>φ_PSR = 90° + ε − α</code>
+      <p>Permanent shadow, however, requires that even the <strong>upper limb</strong> of the Sun never clears the horizon obstruction. The solar disk has an apparent angular radius θ☉ that is largest at perihelion, so the worst case over a full orbit is:</p>
+      <code>θ☉ = arcsin( R☉ / [a(1 − e)] )</code>
+      <p>Setting el_max + θ☉ = α and solving for φ gives the <strong>critical PSR latitude</strong>:</p>
+      <code>φ_PSR = 90° + ε + θ☉ − α</code>
       <p>All surface locations with |φ| ≥ φ_PSR can host PSRs if they have the appropriate topography.</p>
 
+      <h3>Orbital Eccentricity Effects</h3>
+      <p>Eccentricity enters the model through two channels:</p>
+      <ul>
+        <li><strong>Geometric:</strong> at perihelion (r = a(1−e)) the solar disk appears largest, raising the elevation of the upper limb by θ☉ and pushing φ_PSR poleward. For Mercury (e = 0.206) this term is ≈0.87° — larger than Mercury's obliquity itself.</li>
+        <li><strong>Thermal:</strong> the time-averaged insolation over one Keplerian orbit is ⟨1/r²⟩ = 1/(a²√(1−e²)), so T_eq scales by (1−e²)^(−1/8). The perihelion/aphelion flux extremes are also reported.</li>
+      </ul>
+      <p><em>Note:</em> the θ☉ term is evaluated at perihelion, i.e. assuming polar summer solstice can coincide with perihelion. Over precession cycles this alignment recurs, so it is the correct conservative choice for <em>permanent</em> shadow.</p>
+
       <h3>Temperature Estimates</h3>
-      <p>Equilibrium temperature (fast-rotator model):</p>
-      <code>T_eq = 278.5 × (1 − A)^0.25 / √d   [K]</code>
+      <p>Equilibrium temperature (fast-rotator model, orbit-averaged insolation):</p>
+      <code>T_eq = 278.5 × (1 − A)^0.25 / √a × (1 − e²)^(−1/8)   [K]</code>
       <p>PSR temperature (empirical, calibrated against Mercury and Moon observations):</p>
       <code>T_PSR ≈ T_eq × 0.25 × (1 − α / 90°)^0.40</code>
       <p>Water ice is considered <strong>stable</strong> below 110 K, <strong>marginal</strong> between 110–180 K, and <strong>unstable</strong> above 180 K.</p>
@@ -589,7 +610,7 @@
       <table>
         <tr><th>Parameter</th><th>Symbol</th><th>Description</th></tr>
         <tr><td>Obliquity</td><td>ε</td><td>Axial tilt (degrees). Most important factor controlling PSR extent.</td></tr>
-        <tr><td>Eccentricity</td><td>e</td><td>Orbital eccentricity. Affects solar constant at perihelion/aphelion.</td></tr>
+        <tr><td>Eccentricity</td><td>e</td><td>Orbital eccentricity. Sets perihelion distance, which controls the solar disk size θ☉ (raises φ_PSR), the orbit-averaged T_eq, and the peri/aph flux range.</td></tr>
         <tr><td>Crater d/D ratio</td><td>d/D</td><td>Depth-to-diameter ratio. Typical: 0.10–0.20 for fresh craters.</td></tr>
         <tr><td>Slope angle</td><td>β</td><td>Additional pole-facing terrain slope (degrees). Set to 0 if unknown.</td></tr>
         <tr><td>Body radius</td><td>R</td><td>Mean radius in km. Used for PSR area calculation.</td></tr>
@@ -614,7 +635,7 @@
 
       <hr class="section-divider">
       <h2>Current limitations of the Model</h2>
-      <p>This tool implements a first-principles geometric model and is currently intended for exploration and teaching rather than mission-level analysis. Key simplifications include that the equilibrium temperature formula assumes a fast rotator. Slowly rotating bodies (e.g. Mercury with its 3:2 spin-orbit resonance) have a more complex thermal environment. Also, the PSR temperature estimate is empirical and does not account for conduction, internal heat sources (relevant for tidal heating), or regolith thermal inertia. The model also assumes a spherical body, but real topography can create PSRs at latitudes below the theoretical critical latitude on bodies with rugged polar terrain. Linear slope addition assumes a 2D worst-case geometry. In a true 3D environment, the solar azimuth rotates relative to the slope direction throughout the day. Orbital eccentricity is accepted as an input at the moment but does not currently modify the PSR latitude calculation (which assumes mean orbital distance). High eccentricity slightly shifts the insolation pattern; this is a planned refinement.
+      <p>This tool implements a first-principles geometric model and is currently intended for exploration and teaching rather than mission-level analysis. Key simplifications include that the equilibrium temperature formula assumes a fast rotator. Slowly rotating bodies (e.g. Mercury with its 3:2 spin-orbit resonance) have a more complex thermal environment. Also, the PSR temperature estimate is empirical and does not account for conduction, internal heat sources (relevant for tidal heating), or regolith thermal inertia. The model also assumes a spherical body, but real topography can create PSRs at latitudes below the theoretical critical latitude on bodies with rugged polar terrain. Linear slope addition assumes a 2D worst-case geometry. In a true 3D environment, the solar azimuth rotates relative to the slope direction throughout the day. Orbital eccentricity now enters the model through the solar disk size at perihelion (geometric, raises φ_PSR) and the orbit-averaged insolation (thermal, scales T_eq); the θ☉ term conservatively assumes that polar summer solstice can coincide with perihelion, which is the correct worst case for permanence over precession cycles but may overstate the effect for a fixed present-day orbital configuration. Kepler timing asymmetries (more time spent near aphelion) and spin–orbit resonances such as Mercury's longitude-dependent "hot poles" are not modeled.
       </p>
 
       <hr class="section-divider">
@@ -628,7 +649,7 @@
         Orbital parameters: NASA/NSSDCA
       </div>
 
-      <p class="footer-note">Shadowhunter is part of a suite of interactive planetary science visualization tools by Liliane ML Burkhard including Quakeglobe (live seismic monitoring), LA-GRID (geospatial risk dashboard for greater Los Angeles) and the BELA Altimetry Viewer (BepiColombo laser altimeter data; expected online in 2027).</p>
+      <p class="footer-note">Shadowhunter is part of a suite of interactive planetary science visualization tools by LML Burkhard including Quakeglobe (live seismic monitoring), LA GRID (geospatial risk dashboard for greater Los Angeles) and the BELA Altimetry Viewer (BepiColombo laser altimeter data; expected online in 2027).</p>
 
     </div><!-- end about-body -->
   </div><!-- end about-modal -->
@@ -662,13 +683,34 @@ function hideLoader(){ loaderEl.classList.add('fade-out'); setTimeout(()=>loader
 setLoad(5,'INITIALIZING…');
 
 // ─── PHYSICS ────────────────────────────────────────────────────────────────
+const SUN_RADIUS_AU = 0.00465047; // solar radius in AU
+
 function compute(p) {
   // Crater rim angle + additional slope
   const craterAngle  = Math.atan(2 * p.dd) * 180 / Math.PI;
   const horizAngle   = craterAngle + p.slope;
 
+  // ── Eccentricity refinement ──
+  // Perihelion / aphelion distances from semi-major axis and eccentricity
+  const rPeri = p.dist * (1 - p.ecc);
+  const rAp   = p.dist * (1 + p.ecc);
+
+  // (1) GEOMETRIC effect: apparent angular radius of the solar disk.
+  // Permanent shadow requires that even the UPPER LIMB of the Sun never
+  // clears the horizon obstruction. The disk appears largest at perihelion,
+  // so the worst case over a full orbit is θ☉ = arcsin(R☉ / r_peri).
+  // (Ratio clamped to ≤1 for degenerate inputs where r_peri ≤ R☉.)
+  const sunAngPeri = Math.asin(
+    Math.min(SUN_RADIUS_AU / Math.max(rPeri, 1e-9), 1)
+  ) * 180 / Math.PI;
+
+  // Effective obliquity = axial tilt + solar angular radius at perihelion.
+  // This raises the maximum elevation of the solar upper limb and therefore
+  // raises the critical latitude (shrinks the PSR-capable zone).
+  const epsEff = p.obliquity + sunAngPeri;
+
   // Critical latitude: PSRs exist at |φ| > critLat
-  const critLat = 90 + p.obliquity - horizAngle;
+  const critLat = 90 + epsEff - horizAngle;
   const hasPSR  = critLat < 90 && critLat >= 0;
 
   // PSR surface area (both polar caps)
@@ -680,11 +722,18 @@ function compute(p) {
     psrArea = psrFrac * surfArea;
   }
 
-  // Solar irradiance at mean orbital distance
+  // Solar irradiance at mean orbital distance + perihelion/aphelion extremes
   const solarConst = 1361 / (p.dist * p.dist);
+  const solarPeri  = 1361 / (rPeri * rPeri);
+  const solarAp    = 1361 / (rAp * rAp);
 
-  // Equilibrium temperature (fast-rotator model)
-  const tEq = 278.5 * Math.pow(1 - p.albedo, 0.25) / Math.sqrt(p.dist);
+  // (2) THERMAL effect: equilibrium temperature (fast-rotator model) with
+  // the orbit-averaged insolation correction for eccentric orbits.
+  // The exact time average over one Keplerian orbit is
+  //   ⟨1/r²⟩ = 1 / (a² √(1 − e²))
+  // so T_eq scales by (1 − e²)^(−1/8) relative to the circular-orbit value.
+  const eccTempFactor = Math.pow(1 - p.ecc * p.ecc, -0.125);
+  const tEq = 278.5 * Math.pow(1 - p.albedo, 0.25) / Math.sqrt(p.dist) * eccTempFactor;
 
  // PSR temperature estimate (empirical fit to Mercury/Moon known values)
   // T_PSR ≈ T_eq × 0.25 × (1 − α/90°)^0.40
@@ -697,8 +746,9 @@ function compute(p) {
     tPsr = tEq * 0.25 * Math.pow(1 - aEff / 90, 0.40);
   }
 
-  // Minimum horizon angle needed for ANY PSR at the pole (critLat = 90 → α = ε)
-  const minAlpha    = p.obliquity;
+  // Minimum horizon angle needed for ANY PSR at the pole
+  // (critLat = 90 → α = ε + θ☉,peri = effective obliquity)
+  const minAlpha    = epsEff;
   const minDD       = Math.max(0, Math.tan(Math.max(0, minAlpha - p.slope) * Math.PI / 180) / 2);
   const minSlope    = Math.max(0, minAlpha - craterAngle);
 
@@ -707,7 +757,8 @@ function compute(p) {
 
   return {
     craterAngle, horizAngle, critLat, hasPSR,
-    psrFrac, psrArea, surfArea, solarConst, tEq, tPsr,
+    psrFrac, psrArea, surfArea, solarConst, solarPeri, solarAp,
+    sunAngPeri, epsEff, tEq, tPsr,
     iceStable, iceMarginal, minAlpha, minDD, minSlope,
     obliquity: p.obliquity
   };
@@ -722,7 +773,7 @@ function generateGlobeTexture(rgb, result) {
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
   const [r, g, b] = rgb;
-  const { horizAngle, critLat, hasPSR, obliquity } = result;
+  const { horizAngle, critLat, hasPSR, epsEff } = result;
   const h = horizAngle;
 
   // Base body color
@@ -734,7 +785,7 @@ function generateGlobeTexture(rgb, result) {
   for (let py = 0; py < H; py++) {
     const lat    = 90 - (py / H * 180);  // 90° at top → −90° at bottom
     const absLat = Math.abs(lat);
-    const elMax  = 90 - absLat + obliquity; // max solar elevation at this lat
+    const elMax  = 90 - absLat + epsEff; // max elevation of solar upper limb (incl. θ☉ at perihelion)
 
     let R = 0, G = 0, B = 0, A = 0;
 
@@ -816,10 +867,16 @@ function fmtArea(km2) {
 function fmtSolar(s) {
   return s >= 1000 ? (s/1000).toFixed(2)+' kW/m²' : s.toFixed(1)+' W/m²';
 }
+function fmtSolarPair(sp, sa) {
+  // Compact peri/aph pair sharing one unit, chosen from the larger value
+  if (sp >= 1000) return (sp/1000).toFixed(1)+' / '+(sa/1000).toFixed(1)+' kW/m²';
+  return sp.toFixed(0)+' / '+sa.toFixed(0)+' W/m²';
+}
 
 // ─── UPDATE RESULTS PANEL ─────────────────────────────────────────────────────
 function updateResults(res) {
-  const { critLat, hasPSR, psrFrac, psrArea, solarConst, tEq, tPsr,
+  const { critLat, hasPSR, psrFrac, psrArea, solarConst, solarPeri, solarAp,
+          sunAngPeri, tEq, tPsr,
           iceStable, iceMarginal, minAlpha, minDD, minSlope } = res;
 
   const clv = document.getElementById('crit-lat-val');
@@ -843,14 +900,16 @@ function updateResults(res) {
     noPsrBox.style.display = 'block';
     noPsrBox.innerHTML =
       `NO PSR WITH CURRENT PARAMETERS<br><br>`+
-      `MINIMUM HORIZON ANGLE NEEDED:<br><span class="req-highlight">α ≥ ${minAlpha.toFixed(2)}°</span><br><br>`+
+      `MINIMUM HORIZON ANGLE NEEDED:<br><span class="req-highlight">α ≥ ${minAlpha.toFixed(2)}°</span> (= ε + θ☉,PERI)<br><br>`+
       `REQUIRES EITHER:<br>`+
       `d/D > <span class="req-highlight">${minDD.toFixed(3)}</span><br>`+
       `OR SLOPE > <span class="req-highlight">${minSlope.toFixed(1)}°</span>`;
   }
 
-  document.getElementById('res-solar').textContent = fmtSolar(solarConst);
-  document.getElementById('res-teq').textContent   = Math.round(tEq)+' K';
+  document.getElementById('res-solar').textContent  = fmtSolar(solarConst);
+  document.getElementById('res-speri').textContent  = fmtSolarPair(solarPeri, solarAp);
+  document.getElementById('res-sunang').textContent = sunAngPeri.toFixed(2)+'°';
+  document.getElementById('res-teq').textContent    = Math.round(tEq)+' K';
 
   const iceBox = document.getElementById('ice-box');
   const iceLbl = document.getElementById('ice-lbl');
